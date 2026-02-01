@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
     
     const NYQUIST_FREQUENCY = audioCtx.sampleRate / 2; // makes sure we dont break rule of nyquist
 
-    // creating master volume node with someroom to avoid clipping for mutliple notes
     const globalGain = audioCtx.createGain();
     globalGain.gain.setValueAtTime(0.8, audioCtx.currentTime);
     globalGain.connect(audioCtx.destination);
@@ -64,11 +63,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
         '85': [255, 64, 192],   //U - B - Magenta
     }
 
-    // listening for when user presses a key
     window.addEventListener('keydown', keyDown, false);
     window.addEventListener('keyup', keyUp, false);
-
-    // store the notes 
     activeOscillators = {}
     
     // part 1 
@@ -120,8 +116,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
         const key = (event.detail || event.which).toString();
         if (keyboardFrequencyMap[key] && !activeOscillators[key]) {
             playNote(key);
-            updatePolyphonicGains(); // Adjust all voices when new note added
-            updateBackgroundColor(); // part 4: Update background color
+            updatePolyphonicGains(); 
+            updateBackgroundColor(); 
         }
     }
 
@@ -137,9 +133,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
             osc.stop(now + 0.1);
             delete activeOscillators[key];
             
-            // part 3: Adjust remaining voices after this note is removed
             updatePolyphonicGains();
-            updateBackgroundColor(); // part 4: Update background color
+            updateBackgroundColor(); 
         }
     }
 
