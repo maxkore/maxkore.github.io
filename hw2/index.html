@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Web Audio Keyboard Synthesizer</title>
+</head>
+
+<body>
+    <h1>Keyboard Synthesizer</h1>
+    <p></p>
+    <div>
+        <label for="waveform">Synthesis Mode: </label>
+        <select id="waveform">
+            <option value="sine" selected>Sine</option>
+            <option value="sawtooth">Sawtooth</option>
+            <option value="additive">Additive Synthesis</option>
+            <option value="am">AM Synthesis</option>
+            <option value="fm">FM Synthesis</option>
+            <option value="sample">Sample (synth.mp3)</option>
+        </select>
+    </div>
+    <div id="additiveControls" style="display:none; margin-top:10px;">
+        <label for="numPartials">Number of Partials: </label>
+        <input type="range" id="numPartials" min="3" max="8" step="1" value="4">
+        <span id="numPartialsValue">4</span>
+    </div>
+    <div id="amControls" style="display:none; margin-top:10px;">
+        <label for="amDepth">AM Depth: </label>
+        <input type="range" id="amDepth" min="0" max="1" step="0.01" value="0.5">
+        <span id="amDepthValue">0.5</span>
+        <br>
+        <label for="amRate">AM Rate (Hz): </label>
+        <input type="range" id="amRate" min="0.1" max="20" step="0.1" value="5">
+        <span id="amRateValue">5</span>
+    </div>
+    <div id="fmControls" style="display:none; margin-top:10px;">
+        <label for="fmIndex">FM Index: </label>
+        <input type="range" id="fmIndex" min="0" max="500" step="1" value="100">
+        <span id="fmIndexValue">100</span>
+        <br>
+        <label for="fmRatio">FM Ratio: </label>
+        <input type="range" id="fmRatio" min="0.1" max="10" step="0.1" value="2">
+        <span id="fmRatioValue">2</span>
+    </div>
+    
+    <div style="margin-top:20px; padding:10px; border:1px solid #ccc; background:#f9f9f9;">
+        <h3>LFO (Low Frequency Oscillator)</h3>
+        <label>
+            <input type="checkbox" id="lfoEnabled" checked>
+            Enable LFO Vibrato
+        </label>
+        <br>
+        <label for="lfoRate">LFO Rate (Hz): </label>
+        <input type="range" id="lfoRate" min="0.1" max="10" step="0.1" value="4">
+        <span id="lfoRateValue">4</span>
+        <br>
+        <label for="lfoDepth">LFO Depth (cents): </label>
+        <input type="range" id="lfoDepth" min="0" max="50" step="1" value="10">
+        <span id="lfoDepthValue">10</span>
+    </div>
+    
+    <div style="margin-top:20px; padding:10px; border:1px solid #ccc; background:#f9f9f9;">
+        <h3>ADSR Envelope</h3>
+        <label for="attackTime">Attack (s): </label>
+        <input type="range" id="attackTime" min="0.001" max="2" step="0.001" value="0.05">
+        <span id="attackTimeValue">0.05</span>
+        <br>
+        <label for="decayTime">Decay (s): </label>
+        <input type="range" id="decayTime" min="0.001" max="2" step="0.001" value="0.1">
+        <span id="decayTimeValue">0.1</span>
+        <br>
+        <label for="sustainLevel">Sustain Level: </label>
+        <input type="range" id="sustainLevel" min="0" max="1" step="0.01" value="0.7">
+        <span id="sustainLevelValue">0.7</span>
+        <br>
+        <label for="releaseTime">Release (s): </label>
+        <input type="range" id="releaseTime" min="0.001" max="3" step="0.001" value="0.1">
+        <span id="releaseTimeValue">0.1</span>
+    </div>
+    
+    <p>Available keys: </p>
+    <p>Z S X D C F V G B H N J M (lower octave)</p>
+    <p>Q 2 W 3 E R 5 T 6 Y 7 U (upper octave)</p>
+</body>
+<script src="main.js"></script>
+
+</html>
