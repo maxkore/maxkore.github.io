@@ -1,5 +1,7 @@
+# Comp Sound Homework
 # the live page is here: maxkore.github.io
 
-HW1 Comp Sound
+This repo is organized by homework folders at the top level.
 
-added nojekyll to point to correct index/main file
+- HW1: see [hw1/index.html](hw1/index.html)
+- HW2: see [hw2/README.md](hw2/README.md)
