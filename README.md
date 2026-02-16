@@ -1,5 +1,5 @@
 # Comp Sound Homework
-# the live page is here: maxkore.github.io
+# the live page is here: [maxkore.github.io](maxkore.github.io)
 
 This repo is organized by homework folders at the top level.
 
