@@ -7,5 +7,3 @@ questions
 
 - how to get the sample to work
 - CPU resources 
-- timbral difference
-- modulator frequence isnt not related to the key we press, why?
