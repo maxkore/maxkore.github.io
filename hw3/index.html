@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>HW3 - Farnell Synthesis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #eee;
+        }
+        h1, h2 {
+            color: #4fc3f7;
+        }
+        .section {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        button {
+            background: #4fc3f7;
+            color: #1a1a2e;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.1s;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        .instructions {
+            background: #0f3460;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Lab 3: Farnell Synthesis</h1>
+
+    <div class="section">
+        <h2>Part I: Babbling Brook</h2>
+        <p>WebAudio recreation of SuperCollider code:</p>
+        <code>{RHPF.ar(LPF.ar(BrownNoise.ar(), 400), LPF.ar(BrownNoise.ar(), 14) * 400 + 500, 0.03, 0.1)}.play</code>
+        <div class="instructions">
+            <p>Click anywhere on the page or the button below to start the babbling brook sound.</p>
+        </div>
+        <br>
+        <button id="startBrook">▶ Start Babbling Brook</button>
+        <button id="stopBrook" disabled>⏹ Stop</button>
+    </div>
+
+    <div class="section">
+        <h2>Part II: Red Alert Siren (Farnell Practical 35)</h2>
+        <p>Star Trek TOS-style red alert using sawtooth + second harmonic, delay resonators, clipper distortion, and formant bandpass filters.</p>
+        <div class="instructions">
+            <p><strong>Signal chain:</strong> Saw (parabolic sweep 360→847Hz) + 2nd harmonic → HP@1Hz → 5 parallel delay resonators → 61ms loop → HP@12Hz → hard clip → 4 parallel BP filters (740, 1400, 1500, 1600Hz) → envelope</p>
+        </div>
+        <br>
+        <button id="startFarnell">▶ Start Red Alert</button>
+        <button id="stopFarnell" disabled>⏹ Stop</button>
+    </div>
+
+    <div class="section">
+        <h2>Bonus: Air Raid Siren</h2>
+        <p>Classic WWII-style wailing siren that sweeps up and down continuously (~300Hz to ~1400Hz).</p>
+        <div class="instructions">
+            <p><strong>Signal chain:</strong> LFO (0.15Hz) → modulates Saw OSC frequency + 2nd harmonic → soft clipper → bandpass → highpass → output</p>
+        </div>
+        <br>
+        <button id="startAirRaid">▶ Start Air Raid</button>
+        <button id="stopAirRaid" disabled>⏹ Stop</button>
+    </div>
+
+    <script src="main.js"></script>
+    <script>
+        // UI controls for Part I
+        const startBtn = document.getElementById('startBrook');
+        const stopBtn = document.getElementById('stopBrook');
+        let brookStarted = false;
+
+        startBtn.addEventListener('click', () => {
+            if (!brookStarted) {
+                startBabblingBrook();
+                brookStarted = true;
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+            }
+        });
+
+        stopBtn.addEventListener('click', () => {
+            if (brookStarted) {
+                stopBabblingBrook();
+                stopBtn.disabled = true;
+                // Note: BufferSourceNodes can only be started once
+                startBtn.textContent = '(Reload to restart)';
+            }
+        });
+
+        // UI controls for Part II (Red Alert)
+        const startFarnellBtn = document.getElementById('startFarnell');
+        const stopFarnellBtn = document.getElementById('stopFarnell');
+        let redAlertActive = false;
+
+        startFarnellBtn.addEventListener('click', () => {
+            if (!redAlertActive) {
+                startRedAlert();
+                redAlertActive = true;
+                startFarnellBtn.disabled = true;
+                stopFarnellBtn.disabled = false;
+            }
+        });
+
+        stopFarnellBtn.addEventListener('click', () => {
+            if (redAlertActive) {
+                stopRedAlert();
+                redAlertActive = false;
+                startFarnellBtn.disabled = false;
+                stopFarnellBtn.disabled = true;
+            }
+        });
+
+        // UI controls for Air Raid Siren
+        const startAirRaidBtn = document.getElementById('startAirRaid');
+        const stopAirRaidBtn = document.getElementById('stopAirRaid');
+        let airRaidActive = false;
+
+        startAirRaidBtn.addEventListener('click', () => {
+            if (!airRaidActive) {
+                startAirRaid();
+                airRaidActive = true;
+                startAirRaidBtn.disabled = true;
+                stopAirRaidBtn.disabled = false;
+            }
+        });
+
+        stopAirRaidBtn.addEventListener('click', () => {
+            if (airRaidActive) {
+                stopAirRaid();
+                airRaidActive = false;
+                startAirRaidBtn.disabled = false;
+                stopAirRaidBtn.disabled = true;
+            }
+        });
+
+        // Remove the default click listener since we have buttons
+        document.removeEventListener('click', startBabblingBrook);
+    </script>
+
+    <div class="section">
+        <h2>Part II Writeup: Red Alert Siren</h2>
+        
+        <p>The sound I was aiming to mimic was the red alert on page 58 which was the original red alert from Star Trek series. This sound is a rising pitch sweep that cycles throughout. The synthesis techniques I used were the main sawtooth oscillator with a second sawtooth at a 2x frequency (I played around with the sound gain for this one but felt 0.3-0.4 was the best). The manual sweep was a bit tricky with it going from 360hz to 850hz over 900 ms (which can be seen at the bottom of the page at 641). If you look at the spectrum you can see two main regions of energy on page 643 and you can see these peaks exactly in figure 58.3. The synthesis I used was additive, waveshaping and subtractive. I used these because Farnell says "some kind of acoustic relaxation oscillator at the heart of the sound, maybe a type of diaphragm driven by an air blast" on page 644. The formant filters were good to recreate the clumps of energy. Some issues were using DFBE and its delay feedback, didn't sound true to the original sound.</p>
+        
+        <h3>Signal Flow Diagram</h3>
+        <pre style="background: #0f3460; padding: 15px; border-radius: 8px; overflow-x: auto;">
+Saw OSC (360→847Hz) → Gain (0.7) ─┬─→ Soft Clipper ─┬─→ BP 800Hz ──┬─→ Envelope → Output
+                                  │                 ├─→ BP 1500Hz ─┤
+2nd Harmonic (2x freq) → Gain (0.3)─┘                 └─→ Direct ────┘
+        </pre>
+    </div>
+</body>
+
+</html>
