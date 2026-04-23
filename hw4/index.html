@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 5 - Cellular Automata</title>
+    <style>
+        :root {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #0f0f0f;
+            --border-color: #2a2a2a;
+            --border-light: #333;
+            --text-primary: #e0e0e0;
+            --text-secondary: #888;
+            --text-heading: #fff;
+            --accent: #10b981;
+            --accent-hover: #059669;
+            --btn-secondary-bg: #2a2a2a;
+            --canvas-bg: #000;
+            --canvas-border: #333;
+        }
+        
+        body.light-mode {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #fafafa;
+            --border-color: #e0e0e0;
+            --border-light: #d0d0d0;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-heading: #111;
+            --accent: #059669;
+            --accent-hover: #047857;
+            --btn-secondary-bg: #e8e8e8;
+            --canvas-bg: #111;
+            --canvas-border: #ccc;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            margin: 0;
+            padding: 24px;
+            transition: background 0.2s, color 0.2s;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .theme-toggle {
+            background: var(--btn-secondary-bg);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s;
+        }
+        
+        .theme-toggle:hover {
+            background: var(--border-light);
+        }
+        
+        h1 {
+            text-align: center;
+            color: var(--text-heading);
+            font-weight: 600;
+            font-size: 28px;
+            margin: 0;
+            letter-spacing: -0.5px;
+            flex: 1;
+        }
+        
+        .header-spacer {
+            width: 80px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            font-size: 14px;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 24px;
+        }
+        
+        .visualization-panel {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+        
+        #caCanvas {
+            width: 100%;
+            border-radius: 8px;
+            background: var(--canvas-bg);
+            display: block;
+            border: 1px solid var(--canvas-border);
+        }
+        
+        .playhead-info {
+            margin-top: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .generation-counter {
+            color: var(--accent);
+        }
+        
+        .controls-panel {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .control-section {
+            margin-bottom: 24px;
+        }
+        
+        .control-section h3 {
+            color: var(--text-heading);
+            margin-bottom: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .control-group {
+            margin-bottom: 14px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--border-light);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+        
+        input[type="number"], select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+        
+        select {
+            cursor: pointer;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            margin-bottom: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+        
+        .btn-secondary {
+            background: var(--btn-secondary-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--border-light);
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: #fff;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .scale-display {
+            background: var(--bg-tertiary);
+            padding: 10px;
+            border-radius: 6px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 11px;
+            color: var(--accent);
+            text-align: center;
+            margin-top: 8px;
+            border: 1px solid var(--border-light);
+        }
+        
+        .now-playing {
+            margin-top: 16px;
+            padding: 14px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .now-playing h4 {
+            margin: 0 0 8px 0;
+            color: var(--text-secondary);
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        
+        .notes-display {
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 13px;
+            min-height: 20px;
+            color: var(--accent);
+        }
+        
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-spacer"></div>
+            <h1>Lab 5</h1>
+            <button class="theme-toggle" id="themeToggle">
+                <span id="themeIcon">☀️</span>
+                <span id="themeText">Light</span>
+            </button>
+        </div>
+        <p class="subtitle">Randomize or fill in manually by clicking a cell</p>
+        
+        <div class="main-content">
+            <div class="visualization-panel">
+                <canvas id="caCanvas" width="1000" height="600"></canvas>
+                <div class="playhead-info">
+                    <span class="generation-counter">Generation: <span id="genCount">0</span></span>
+                    <span id="statusText">Ready</span>
+                </div>
+                
+                <div class="now-playing">
+                    <h4>Now Playing</h4>
+                    <div class="notes-display" id="notesDisplay">-</div>
+                </div>
+            </div>
+            
+            <div class="controls-panel">
+                <div class="control-section">
+                    <h3>Playback</h3>
+                    <button class="btn btn-primary" id="playBtn">▶ Start Evolution</button>
+                    <button class="btn btn-secondary" id="stopBtn">⏹ Stop</button>
+                    <button class="btn btn-secondary" id="resetBtn">↺ Randomize Grid</button>
+                </div>
+                
+                <div class="control-section">
+                    <h3>CA Rules</h3>
+                    <div class="control-group">
+                        <label>Rule Set</label>
+                        <select id="ruleSelect">
+                            <option value="life">Game of Life (B3/S23)</option>
+                            <option value="highlife">HighLife (B36/S23)</option>
+                            <option value="daynight">Day & Night (B3678/S34678)</option>
+                            <option value="seeds">Seeds (B2/S)</option>
+                            <option value="diamoeba">Diamoeba (B35678/S5678)</option>
+                            <option value="custom">Custom Rule</option>
+                        </select>
+                    </div>
+                    <div class="control-group" id="customRuleGroup" style="display: none;">
+                        <label>Birth (comma-separated)</label>
+                        <input type="text" id="birthRule" value="3" placeholder="e.g., 3,6">
+                        <label style="margin-top: 10px;">Survive (comma-separated)</label>
+                        <input type="text" id="surviveRule" value="2,3" placeholder="e.g., 2,3">
+                    </div>
+                    <div class="control-group">
+                        <label>Initial Density: <span id="densityValue">10</span>%</label>
+                        <input type="range" id="density" min="3" max="15" value="10">
+                    </div>
+                </div>
+                
+                <div class="control-section">
+                    <h3>Music Settings</h3>
+                    <div class="control-group">
+                        <label>Genre Preset</label>
+                        <select id="genreSelect">
+                            <option value="custom">Custom</option>
+                            <option value="ambient" selected>Ambient</option>
+                            <option value="jazz">Jazz</option>
+                            <option value="electronic">Electronic</option>
+                            <option value="classical">Classical</option>
+                            <option value="blues">Blues</option>
+                            <option value="horror">Dark/Horror</option>
+                            <option value="funk">Funk</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Scale</label>
+                        <select id="scaleSelect">
+                            <option value="pentatonic">Pentatonic Major</option>
+                            <option value="pentatonic_minor">Pentatonic Minor</option>
+                            <option value="major">Major</option>
+                            <option value="minor">Natural Minor</option>
+                            <option value="dorian">Dorian</option>
+                            <option value="blues">Blues</option>
+                            <option value="harmonic_minor">Harmonic Minor</option>
+                            <option value="phrygian">Phrygian</option>
+                            <option value="lydian">Lydian</option>
+                            <option value="mixolydian">Mixolydian</option>
+                            <option value="japanese">Japanese</option>
+                            <option value="diminished">Diminished</option>
+                            <option value="whole_tone">Whole Tone</option>
+                            <option value="chromatic">Chromatic</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Root Note</label>
+                        <select id="rootSelect">
+                            <option value="C">C</option>
+                            <option value="C#">C#</option>
+                            <option value="D">D</option>
+                            <option value="D#">D#</option>
+                            <option value="E">E</option>
+                            <option value="F">F</option>
+                            <option value="F#">F#</option>
+                            <option value="G">G</option>
+                            <option value="G#">G#</option>
+                            <option value="A" selected>A</option>
+                            <option value="A#">A#</option>
+                            <option value="B">B</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>BPM: <span id="bpmValue">60</span></label>
+                        <input type="range" id="bpm" min="30" max="180" value="60">
+                    </div>
+                    <div class="scale-display" id="scaleDisplay">A - C - D - E - G</div>
+                </div>
+                
+                <div class="control-section">
+                    <h3>Sound</h3>
+                    <div class="control-group">
+                        <label>Waveform</label>
+                        <select id="waveformSelect">
+                            <option value="sine">Sine</option>
+                            <option value="triangle" selected>Triangle</option>
+                            <option value="sawtooth">Sawtooth</option>
+                            <option value="square">Square</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Volume: <span id="volumeValue">50</span>%</label>
+                        <input type="range" id="volume" min="0" max="100" value="50">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="cellular-automata.js"></script>
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+        
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-mode');
+            themeIcon.textContent = '🌙';
+            themeText.textContent = 'Dark';
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            
+            themeIcon.textContent = isLight ? '🌙' : '☀️';
+            themeText.textContent = isLight ? 'Dark' : 'Light';
+            
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        });
+    </script>
+</body>
+</html>
