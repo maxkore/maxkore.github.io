@@ -6,4 +6,4 @@ This repo is organized by homework folders at the top level.
 - HW1: see [hw1](https://maxkore.github.io/hw1/)
 - HW2: see [hw2](https://maxkore.github.io/hw2/)
 - HW3: see [hw3](https://maxkore.github.io/hw3/)
-- HW4: see [hw4](https://maxkore.github.io/h43/)
+- HW4: see [hw4](https://maxkore.github.io/hw4/)
