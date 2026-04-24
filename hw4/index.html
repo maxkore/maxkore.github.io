@@ -449,5 +449,48 @@
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
         });
     </script>
+    
+    <div class="container" style="margin-top: 48px; padding-bottom: 48px;">
+        <div class="article-section" style="background: var(--bg-secondary); border-radius: 12px; padding: 32px; border: 1px solid var(--border-color);">
+            <h2 style="color: var(--text-heading); margin-top: 0;">About This Project</h2>
+            
+            <p style="color: var(--text-primary); line-height: 1.7;">
+                We introduce the cellular automata music generator for Lab 5. This uses Moore's Game of Life in the grid, 
+                applying certain rules on how to "birth" a new alive cell or kill a cell. The grid directly ties to a 
+                mapping for notes. Each row corresponds to a certain pitch in the selected scale chosen by the user.
+            </p>
+            
+            <h3 style="color: var(--text-heading);">How It Works</h3>
+            
+            <p style="color: var(--text-primary); line-height: 1.7;">
+                The sound generator uses the basic Web Audio API oscillators. These are then turned into frequencies. 
+                I have also added waveform options (sine, triangle, sawtooth, square). I was debating on making certain 
+                parts of the map use different types of waveforms, but it sounded quite weird, so I kept it uniform.
+            </p>
+            
+            <p style="color: var(--text-primary); line-height: 1.7;">
+                <strong>Example flow:</strong> If you're in A pentatonic (A-C-D-E-G) with 5 rows, and column 3 has cells 
+                alive in rows 0 and 2, it plays A and D simultaneously when the playhead reaches that column.
+            </p>
+            
+            <h3 style="color: var(--text-heading);">Development Process</h3>
+            
+            <p style="color: var(--text-primary); line-height: 1.7;">
+                My front-end skills are very weak, so for this lab I depended on Copilot querying to build out the front end. 
+                There were two main issues that I ran into:
+            </p>
+            
+            <ul style="color: var(--text-primary); line-height: 1.7;">
+                <li><strong>Sound quality:</strong> The sounds never sounded succinct and did not "flow" with one another. 
+                Getting smooth transitions between notes was a challenge.</li>
+                <li><strong>Styling limitations:</strong> A typical stylistic issue when it comes to prompting is that 
+                it always looks the same. I tried changing it but it would not deviate off its normal style.</li>
+            </ul>
+            
+            <p style="margin-top: 24px;">
+                <a href="blog.html" style="color: var(--accent); text-decoration: none; font-weight: 500;">Read the full blog post →</a>
+            </p>
+        </div>
+    </div>
 </body>
 </html>

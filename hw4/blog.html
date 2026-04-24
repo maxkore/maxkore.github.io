@@ -110,172 +110,46 @@
 </head>
 <body>
     <article>
-        <h1>From Chaos to Composition: Building a Cellular Automata Music Generator with Web Audio</h1>
+        <h1>Cellular Automata Music Generator - Lab 5</h1>
         
-        <p class="meta">A deep dive into emergent musical patterns and the surprising musicality of simple rules</p>
-        
-        <p>
-            What if music could emerge from the same mathematical principles that govern the growth of snowflakes, 
-            the spread of forest fires, and the patterns on seashells? This is the premise behind <span class="highlight">cellular automata composition</span> — 
-            a technique that uses simple, deterministic rules to generate complex, often beautiful musical sequences.
-        </p>
-        
-        <p>
-            In this post, I'll walk through the development of a real-time cellular automata music generator built 
-            entirely with vanilla JavaScript and the Web Audio API. No external libraries, no MIDI files — just 
-            code, rules, and emergent sound.
-        </p>
+        <p class="meta">Exploring generative music through Conway's Game of Life</p>
         
         <a href="index.html" class="demo-link">▶ Try the Live Demo</a>
         
-        <h2>What Are Cellular Automata?</h2>
+        <h2>Overview</h2>
         
         <p>
-            Cellular automata (CA) are discrete computational systems consisting of a grid of cells, each in one 
-            of a finite number of states. At each time step, every cell updates its state based on the states of 
-            its neighbors according to fixed rules. The most famous example is John Conway's <em>Game of Life</em>, 
-            where cells live, die, or are born based on how many neighbors surround them.
+            We introduce the cellular automata music generator for Lab 5. This uses Moore's Game of Life in the grid, 
+            applying certain rules on how to "birth" a new alive cell or kill a cell. The grid directly ties to a 
+            mapping for notes — each row corresponds to a certain pitch in the selected scale chosen by the user.
+        </p>
+        
+        <h2>How It Works</h2>
+        
+        <p>
+            The sound generator uses the basic Web Audio API oscillators. These are then turned into frequencies. 
+            I have also added waveform options (sine, triangle, sawtooth, square). I was debating on making certain 
+            parts of the map use different types of waveforms, but it sounded quite weird, so I kept it uniform.
         </p>
         
         <p>
-            The key insight that makes CA musically interesting is this: <strong>simple local rules can produce 
-            globally complex, evolving patterns</strong>. A CA that starts from random noise will often settle into 
-            rhythmic cycles, traveling waves, or stable structures — all properties we associate with music.
+            <strong>Example flow:</strong> If you're in A pentatonic (A-C-D-E-G) with 5 rows, and column 3 has cells 
+            alive in rows 0 and 2, it plays A and D simultaneously when the playhead reaches that column.
         </p>
         
-        <h2>The Mapping Problem: From Pixels to Pitches</h2>
+        <h2>Development Process</h2>
         
         <p>
-            The central challenge in CA composition isn't implementing the automaton itself — that's straightforward. 
-            The real puzzle is <span class="highlight">how to map the visual grid to musical parameters</span>. This 
-            is where I discovered insights that went beyond what we covered in class.
-        </p>
-        
-        <p>
-            My approach maps the CA grid as follows:
-        </p>
-        
-        <ul>
-            <li><strong>Rows → Pitches:</strong> Each row corresponds to a note in the chosen musical scale</li>
-            <li><strong>Columns → Time:</strong> The playhead moves left-to-right across each generation</li>
-            <li><strong>Cell states → Note triggers:</strong> Living cells trigger their row's note</li>
-            <li><strong>Generations → Macro-time:</strong> After scanning one grid, we evolve to the next generation</li>
-        </ul>
-        
-        <p>
-            What surprised me was how much the <em>choice of scale</em> affects the musical result. Running the exact 
-            same CA pattern through a pentatonic scale versus a chromatic scale produces radically different emotional 
-            content. The pentatonic scale's lack of semitones acts as a natural "consonance filter," making almost any 
-            random pattern sound pleasant. The chromatic scale, by contrast, exposes the CA's chaotic nature.
-        </p>
-        
-        <blockquote>
-            "The automaton is the composer; the scale is the editor."
-        </blockquote>
-        
-        <h2>Choosing Rules: Not All CA Are Musical</h2>
-        
-        <p>
-            I implemented five different rule sets and found dramatic differences in their musical utility:
-        </p>
-        
-        <p>
-            <strong>Game of Life (B3/S23)</strong> produces the most "flowing" compositions. Its balance of 
-            stability and chaos creates patterns that breathe — dense regions thin out, sparse regions fill in, 
-            creating natural dynamics.
-        </p>
-        
-        <p>
-            <strong>Seeds (B2/S)</strong> is explosive. Every living cell dies immediately, so patterns cascade 
-            outward like fireworks. Musically, this creates rapid bursts of notes followed by silence — dramatic 
-            but exhausting over time.
-        </p>
-        
-        <p>
-            <strong>Day & Night (B3678/S34678)</strong> surprised me the most. Its symmetry between birth and 
-            survival rules means dense and sparse regions are treated equivalently. This creates a kind of 
-            "negative space" music where the silence is as structured as the sound.
-        </p>
-        
-        <pre><code>// The rules that govern musical character
-const RULE_PRESETS = {
-    life:     { birth: [3],       survive: [2, 3] },      // Balanced, flowing
-    seeds:    { birth: [2],       survive: [] },           // Explosive, sparse
-    daynight: { birth: [3,6,7,8], survive: [3,4,6,7,8] }  // Symmetric, dense
-};</code></pre>
-        
-        <h2>The Web Audio Architecture</h2>
-        
-        <p>
-            When multiple cells in a column are alive, we play multiple notes simultaneously — effectively creating 
-            chords. This posed a technical challenge: how do you prevent clipping when the density of living cells 
-            varies wildly?
-        </p>
-        
-        <p>
-            My solution uses a <code>DynamicsCompressor</code> node as a limiter. This automatically reduces gain 
-            when the signal gets too hot, allowing dense moments to be loud-but-not-distorted:
-        </p>
-        
-        <pre><code>// Prevent clipping with automatic compression
-this.compressor = this.audioContext.createDynamicsCompressor();
-this.compressor.threshold.value = -24;  // Start compressing at -24dB
-this.compressor.ratio.value = 12;       // Strong compression when triggered
-this.compressor.attack.value = 0.003;   // Fast attack catches transients</code></pre>
-        
-        <p>
-            Each note uses an ADSR envelope (Attack, Decay, Sustain, Release) to shape its amplitude over time. 
-            Without envelopes, notes would click harshly at the start and end. With them, notes blend smoothly 
-            into each other, creating legato passages when cells persist across generations.
-        </p>
-        
-        <h2>Unexpected Discoveries</h2>
-        
-        <p>
-            <strong>1. Initial density matters more than rules.</strong> A 20% initial density with Game of Life 
-            rules sounds completely different from 50% density with the same rules. Lower densities create 
-            sparse, contemplative music; higher densities create dense, overwhelming textures.
-        </p>
-        
-        <p>
-            <strong>2. The toroidal topology creates loops.</strong> Because edges wrap around (what exits right 
-            re-enters left), patterns that would die at boundaries instead cycle back, creating unexpected 
-            repetition and structure.
-        </p>
-        
-        <p>
-            <strong>3. Tempo changes the perceived genre.</strong> At 60 BPM, the output sounds ambient. At 180 BPM, 
-            the same pattern sounds like glitchy electronica. The CA doesn't know what tempo it's generating for — 
-            this interpretation layer is entirely artificial.
-        </p>
-        
-        <h2>Future Directions</h2>
-        
-        <p>
-            This implementation scratches the surface of what's possible. Some ideas for extension:
+            My front-end skills are very weak, so for this lab I depended on Copilot querying to build out the front end. 
+            There were two main issues that I ran into:
         </p>
         
         <ul>
-            <li>Use cell <em>age</em> (how long it's been alive) to modulate timbre</li>
-            <li>Map cell <em>birth</em> events to accented notes versus sustained cells to held notes</li>
-            <li>Use multiple CA running in parallel for different instruments</li>
-            <li>Implement 3D CA where the Z-axis controls another musical parameter (e.g., filter cutoff)</li>
+            <li><strong>Sound quality:</strong> The sounds never sounded succinct and did not "flow" with one another. 
+            Getting smooth transitions between notes was a challenge.</li>
+            <li><strong>Styling limitations:</strong> A typical stylistic issue when it comes to prompting is that 
+            it always looks the same. I tried changing it but it would not deviate off its normal style.</li>
         </ul>
-        
-        <h2>Conclusion</h2>
-        
-        <p>
-            Building this system taught me that <span class="highlight">automated composition is less about algorithms 
-            finding good music and more about designers creating constraints that make bad music unlikely</span>. The 
-            cellular automaton doesn't "know" anything about music theory — it just follows rules. But by carefully 
-            choosing the mapping (scale, tempo, waveform, envelope), we can ensure that whatever emerges will at 
-            least be <em>interesting</em>.
-        </p>
-        
-        <p>
-            This is perhaps the deepest lesson: in generative music, the art isn't in the algorithm. It's in the 
-            space of possibilities you allow the algorithm to explore.
-        </p>
         
         <a href="index.html" class="demo-link">▶ Try the Live Demo</a>
         
